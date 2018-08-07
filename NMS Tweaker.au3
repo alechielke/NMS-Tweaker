@@ -52,6 +52,22 @@ $GCGAMEPLAYGLOBALSarray[1][1] = 50
 $GCGAMEPLAYGLOBALSarray[2][0] = False
 $GCGAMEPLAYGLOBALSarray[2][1] = 200
 
+;Multitool scanner recharge rate
+$GCGAMEPLAYGLOBALSarray[3][0] = False
+$GCGAMEPLAYGLOBALSarray[3][1] = 30
+
+;Ship scanner range
+$GCGAMEPLAYGLOBALSarray[4][0] = False
+$GCGAMEPLAYGLOBALSarray[4][1] = 10000
+
+;Ship scanner recharge rate
+$GCGAMEPLAYGLOBALSarray[5][0] = False
+$GCGAMEPLAYGLOBALSarray[5][1] = 10
+
+;Max tech stacking
+$GCGAMEPLAYGLOBALSarray[6][0] = False
+$GCGAMEPLAYGLOBALSarray[6][1] = 3
+
 
 Func breakscript()
 
@@ -108,8 +124,26 @@ Func createGUI()
 	  GUICtrlSetLimit(-1, 9999999, 0)
 	  Global $multitoolScannerRangeLabel = GUICtrlCreateLabel('Multitool scanner range', 260, $tabRowHeight+12, 165, 30)
 
+	  ;The input for multitool scanner recharge speed
+	  Global $multitoolScannerRechargeInput = GUICtrlCreateInput($GCGAMEPLAYGLOBALSarray[3][1], 680, $tabRowHeight+10, 70, 20, $SS_NOTIFY)
+	  GUICtrlCreateUpdown($multitoolScannerRechargeInput)
+	  GUICtrlSetLimit(-1, 9999999, 0)
+	  Global $multitoolScannerRechargeLabel = GUICtrlCreateLabel('Multitool scanner recharge speed', 510, $tabRowHeight+12, 165, 30)
+
+	  ;The input for ship scanner range
+	  Global $shipScannerRangeInput = GUICtrlCreateInput($GCGAMEPLAYGLOBALSarray[4][1], 180, $tabRowHeight+10+30, 70, 20, $SS_NOTIFY)
+	  GUICtrlCreateUpdown($shipScannerRangeInput)
+	  GUICtrlSetLimit(-1, 9999999, 0)
+	  Global $shipScannerRangeLabel = GUICtrlCreateLabel('Ship scanner range', 10, $tabRowHeight+12+30, 165, 30)
+
+	  ;The input for ship scanner recharge rate
+	  Global $shipScannerRechargeInput = GUICtrlCreateInput($GCGAMEPLAYGLOBALSarray[5][1], 430, $tabRowHeight+10+30, 70, 20, $SS_NOTIFY)
+	  GUICtrlCreateUpdown($shipScannerRechargeInput)
+	  GUICtrlSetLimit(-1, 9999999, 0)
+	  Global $shipScannerRechargeLabel = GUICtrlCreateLabel('Ship scanner recharge rate', 260, $tabRowHeight+12+30, 165, 30)
+
    ;Create the spaceship tab
-   GUICtrlCreateTabItem('Spaceship')
+   GUICtrlCreateTabItem('Inventory')
 
 	  ;Creating dividers
 	  GUICtrlCreateLabel("", 254, $tabRowHeight+10, 2, 755-$tabRowHeight, $SS_SUNKEN)
@@ -120,6 +154,19 @@ Func createGUI()
 	  GUICtrlCreateUpdown($starshipInteractRangeInput)
 	  GUICtrlSetLimit(-1, 9999999, 0)
 	  Global $starshipInteractRangeLabel = GUICtrlCreateLabel('Starship interact range', 10, $tabRowHeight+12, 165, 30)
+
+   ;Create the technology tab
+   GUICtrlCreateTabItem('Technology')
+
+	  ;Creating dividers
+	  GUICtrlCreateLabel("", 254, $tabRowHeight+10, 2, 755-$tabRowHeight, $SS_SUNKEN)
+	  GUICtrlCreateLabel("", 504, $tabRowHeight+10, 2, 755-$tabRowHeight, $SS_SUNKEN)
+
+	  ;The input for analysis time
+	  Global $maxTechStackingInput = GUICtrlCreateInput($GCGAMEPLAYGLOBALSarray[6][1], 180, $tabRowHeight+10, 70, 20, $SS_NOTIFY)
+	  GUICtrlCreateUpdown($maxTechStackingInput)
+	  GUICtrlSetLimit(-1, 100, 0)
+	  Global $maxTechStackingLabel = GUICtrlCreateLabel('Max tech stacking', 10, $tabRowHeight+12, 165, 20)
 
    ;Close the tab framework
    GUICtrlCreateTabItem('')
@@ -196,6 +243,27 @@ Func generatePakFile()
 			   _FileWriteToLine(@ScriptDir&'\Workshop\GCGAMEPLAYGLOBALS.GLOBAL.exml', 427, '<Property name="PulseRange" value="'&GUICtrlRead($multitoolScannerRangeInput)&'" />', True)
 			EndIf
 
+			;Writing multitool scanner recharge rate to file
+			If $GCGAMEPLAYGLOBALSarray[3][0] Then
+			   _FileWriteToLine(@ScriptDir&'\Workshop\GCGAMEPLAYGLOBALS.GLOBAL.exml', 423, '<Property name="ChargeTime" value="'&GUICtrlRead($multitoolScannerRechargeInput)&'" />', True)
+			   _FileWriteToLine(@ScriptDir&'\Workshop\GCGAMEPLAYGLOBALS.GLOBAL.exml', 430, '<Property name="ChargeTime" value="'&GUICtrlRead($multitoolScannerRechargeInput)&'" />', True)
+			EndIf
+
+			;Writing ship scanner range to file
+			If $GCGAMEPLAYGLOBALSarray[4][0] Then
+			   _FileWriteToLine(@ScriptDir&'\Workshop\GCGAMEPLAYGLOBALS.GLOBAL.exml', 483, '<Property name="PulseRange" value="'&GUICtrlRead($shipScannerRangeInput)&'" />', True)
+			EndIf
+
+			;Writing ship scanner recharge rate to file
+			If $GCGAMEPLAYGLOBALSarray[5][0] Then
+			   _FileWriteToLine(@ScriptDir&'\Workshop\GCGAMEPLAYGLOBALS.GLOBAL.exml', 486, '<Property name="ChargeTime" value="'&GUICtrlRead($shipScannerRechargeInput)&'" />', True)
+			EndIf
+
+			;Writing ship scanner recharge rate to file
+			If $GCGAMEPLAYGLOBALSarray[6][0] Then
+			   _FileWriteToLine(@ScriptDir&'\Workshop\GCGAMEPLAYGLOBALS.GLOBAL.exml', 12, '<Property name="MaxNumSameGroupTech" value="'&GUICtrlRead($maxTechStackingInput)&'" />', True)
+			EndIf
+
 	  EndSwitch
 
 	  Run(@ScriptDir&'\Workshop\MBINCompiler.exe Workshop\'&$a&'.exml Workshop\'&$a&'.MBIN' , '', 0)
@@ -208,9 +276,10 @@ Func generatePakFile()
    Sleep(1000)
 
    ;Creating the pak file
+   Local $pakName = InputBox('NMS Tweaker', 'Name your pak file', 'MyNMSTweaks')
    RunWait('"' & @ComSpec & '" /c cd Workshop && PSArcTool.exe '&$pakParameterString, '', @SW_HIDE)
    Sleep(5000)
-   RunWait('"' & @ComSpec & '" /c cd Workshop && Del '&$pakDeleteParameterString&' && move psarc.pak ..\MyNMSTweaks.pak', '', @SW_HIDE)
+   RunWait('"' & @ComSpec & '" /c cd Workshop && Del '&$pakDeleteParameterString&' && move psarc.pak ..\'&$pakName&'.pak', '', @SW_HIDE)
    ProcessClose('cmd.exe')
 
    MsgBox($MB_OK, 'NMS Tweaker', 'Pak file generated')
@@ -239,6 +308,34 @@ Func updateIncompatibleList()
 	  $GCGAMEPLAYGLOBALSarray[2][0] = True
    Else
 	  $GCGAMEPLAYGLOBALSarray[2][0] = False
+   EndIf
+
+   ;Check if multitool scanner recharge rate has been modified
+   If GUICtrlRead($multitoolScannerRechargeInput) <> $GCGAMEPLAYGLOBALSarray[3][1] Then
+	  $GCGAMEPLAYGLOBALSarray[3][0] = True
+   Else
+	  $GCGAMEPLAYGLOBALSarray[3][0] = False
+   EndIf
+
+   ;Check if ship scanner range has been modified
+   If GUICtrlRead($shipScannerRangeInput) <> $GCGAMEPLAYGLOBALSarray[4][1] Then
+	  $GCGAMEPLAYGLOBALSarray[4][0] = True
+   Else
+	  $GCGAMEPLAYGLOBALSarray[4][0] = False
+   EndIf
+
+   ;Check if ship scanner recharge rate has been modified
+   If GUICtrlRead($shipScannerRechargeInput) <> $GCGAMEPLAYGLOBALSarray[5][1] Then
+	  $GCGAMEPLAYGLOBALSarray[5][0] = True
+   Else
+	  $GCGAMEPLAYGLOBALSarray[5][0] = False
+   EndIf
+
+   ;Check if max tech stacking has been modified
+   If GUICtrlRead($maxTechStackingInput) <> $GCGAMEPLAYGLOBALSarray[6][1] Then
+	  $GCGAMEPLAYGLOBALSarray[6][0] = True
+   Else
+	  $GCGAMEPLAYGLOBALSarray[6][0] = False
    EndIf
 
    ;Update incompatibleList
