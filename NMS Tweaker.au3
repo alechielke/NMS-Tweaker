@@ -1,3 +1,13 @@
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Icon=..\NMS Tweaker\Pictures\NMS Tweaker Icon.ico
+#AutoIt3Wrapper_Outfile=NMS Tweaker 32 bit.Exe
+#AutoIt3Wrapper_Outfile_x64=NMS Tweaker 64 bit.Exe
+#AutoIt3Wrapper_UseUpx=y
+#AutoIt3Wrapper_Compile_Both=y
+#AutoIt3Wrapper_UseX64=y
+#AutoIt3Wrapper_Run_AU3Check=n
+#AutoIt3Wrapper_Add_Constants=n
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 ;Required files
 #include <String.au3>
 #include <IE.au3>
@@ -37,6 +47,7 @@ $tabRowHeight = 20
 
 ;Creating default arrays
 Global $GCGAMEPLAYGLOBALSarray[1000][5]
+Global $GCAISPACESHIPGLOBALSarray[1000][5]
 
 ;Populating default arrays
 
@@ -67,6 +78,22 @@ $GCGAMEPLAYGLOBALSarray[5][1] = 10
 ;Max tech stacking
 $GCGAMEPLAYGLOBALSarray[6][0] = False
 $GCGAMEPLAYGLOBALSarray[6][1] = 3
+
+;Freighter spawn chance
+$GCAISPACESHIPGLOBALSarray[0][0] = False
+$GCAISPACESHIPGLOBALSarray[0][1] = 40
+
+;Warps between battles
+$GCGAMEPLAYGLOBALSarray[7][0] = False
+$GCGAMEPLAYGLOBALSarray[7][1] = 5
+
+;Hours between battles
+$GCGAMEPLAYGLOBALSarray[8][0] = False
+$GCGAMEPLAYGLOBALSarray[8][1] = 3
+
+;Crashed Ship Minimum Broken Slots
+$GCAISPACESHIPGLOBALSarray[1][0] = False
+$GCAISPACESHIPGLOBALSarray[1][1] = 3
 
 
 Func breakscript()
@@ -105,6 +132,34 @@ Func createGUI()
    Global $Tab = GUICtrlCreateTab(5, 5, 750, 765)
    GUICtrlSetResizing($Tab, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKBOTTOM + $GUI_DOCKAUTO)
 
+   ;Create the full mods tab
+   GUICtrlCreateTabItem('Full Mods')
+
+	  ;Create a select box for Starship Out of Range (alechielke)
+	  Global $fullmodSSOORInput = GUICtrlCreateCombo('None selected', 548, $tabRowHeight+10, 200, 20)
+	  Global $fullmodSSOORLabel = GUICtrlCreateLabel('Starship Out of Range (alechielke)', 10, $tabRowHeight+12, 533, 20)
+	  GUICtrlSetData($fullmodSSOORInput, '200 units|500 units|1000 units|5000 units|Infinite', 'None selected')
+	  Global $fullmodSSOORCurrentValue = 'None selected'
+
+	  ;Create a select box for Faster Scanner (alechielke)
+	  Global $fullmodFasterScannerInput = GUICtrlCreateCombo('None selected', 548, $tabRowHeight+10+25, 200, 20)
+	  Global $fullmodFasterScannerLabel = GUICtrlCreateLabel('Faster Scanner (alechielke)', 10, $tabRowHeight+12+25, 533, 20)
+	  GUICtrlSetData($fullmodFasterScannerInput, 'Standard version', 'None selected')
+	  Global $fullmodFasterScannerCurrentValue = 'None selected'
+
+	  ;Create a select box for Faster Analysis (alechielke)
+	  Global $fullmodFasterAnalysisInput = GUICtrlCreateCombo('None selected', 548, $tabRowHeight+10+50, 200, 20)
+	  Global $fullmodFasterAnalysisLabel = GUICtrlCreateLabel('Faster Analysis (alechielke)', 10, $tabRowHeight+12+50, 533, 20)
+	  GUICtrlSetData($fullmodFasterAnalysisInput, '3 seconds|1 second|Instant', 'None selected')
+	  Global $fullmodFasterAnalysisCurrentValue = 'None selected'
+
+	  ;Create a select box for Unlimited Tech Stacking (Greshloc)
+	  Global $fullmodUnlimitedTechStackingInput = GUICtrlCreateCombo('None selected', 548, $tabRowHeight+10+75, 200, 20)
+	  Global $fullmodUnlimitedTechStackingLabel = GUICtrlCreateLabel('Unlimited Tech Stacking (Greshloc)', 10, $tabRowHeight+12+75, 533, 20)
+	  GUICtrlSetData($fullmodUnlimitedTechStackingInput, '2x|4x|6x|Unlimited', 'None selected')
+	  Global $fullmodUnlimitedTechStackingCurrentValue = 'None selected'
+
+
    ;Create the scanning tab
    GUICtrlCreateTabItem('Scanning')
 
@@ -142,7 +197,8 @@ Func createGUI()
 	  GUICtrlSetLimit(-1, 9999999, 0)
 	  Global $shipScannerRechargeLabel = GUICtrlCreateLabel('Ship scanner recharge rate', 260, $tabRowHeight+12+30, 165, 30)
 
-   ;Create the spaceship tab
+
+   ;Create the inventory tab
    GUICtrlCreateTabItem('Inventory')
 
 	  ;Creating dividers
@@ -155,6 +211,7 @@ Func createGUI()
 	  GUICtrlSetLimit(-1, 9999999, 0)
 	  Global $starshipInteractRangeLabel = GUICtrlCreateLabel('Starship interact range', 10, $tabRowHeight+12, 165, 30)
 
+
    ;Create the technology tab
    GUICtrlCreateTabItem('Technology')
 
@@ -162,11 +219,58 @@ Func createGUI()
 	  GUICtrlCreateLabel("", 254, $tabRowHeight+10, 2, 755-$tabRowHeight, $SS_SUNKEN)
 	  GUICtrlCreateLabel("", 504, $tabRowHeight+10, 2, 755-$tabRowHeight, $SS_SUNKEN)
 
-	  ;The input for analysis time
+	  ;The input for max tech stacking
 	  Global $maxTechStackingInput = GUICtrlCreateInput($GCGAMEPLAYGLOBALSarray[6][1], 180, $tabRowHeight+10, 70, 20, $SS_NOTIFY)
 	  GUICtrlCreateUpdown($maxTechStackingInput)
 	  GUICtrlSetLimit(-1, 100, 0)
 	  Global $maxTechStackingLabel = GUICtrlCreateLabel('Max tech stacking', 10, $tabRowHeight+12, 165, 20)
+
+
+   ;Create the fleet tab
+   GUICtrlCreateTabItem('Fleet')
+
+	  ;Creating dividers
+	  GUICtrlCreateLabel("", 254, $tabRowHeight+10, 2, 755-$tabRowHeight, $SS_SUNKEN)
+	  GUICtrlCreateLabel("", 504, $tabRowHeight+10, 2, 755-$tabRowHeight, $SS_SUNKEN)
+
+	  ;The input for freighter spawn chance
+	  Global $freighterSpawnChanceInput = GUICtrlCreateInput($GCAISPACESHIPGLOBALSarray[0][1], 180, $tabRowHeight+10, 70, 20, $SS_NOTIFY)
+	  GUICtrlCreateUpdown(-1)
+	  GUICtrlSetLimit(-1, 100, 0)
+	  Global $freighterSpawnChanceLabel = GUICtrlCreateLabel('Freighter Spawn Chance', 10, $tabRowHeight+12, 165, 20)
+
+
+   ;Create the space tab
+   GUICtrlCreateTabItem('Space')
+
+	  ;Creating dividers
+	  GUICtrlCreateLabel("", 254, $tabRowHeight+10, 2, 755-$tabRowHeight, $SS_SUNKEN)
+	  GUICtrlCreateLabel("", 504, $tabRowHeight+10, 2, 755-$tabRowHeight, $SS_SUNKEN)
+
+	  ;The input for warps between battles
+	  Global $warpsBetweenBattlesInput = GUICtrlCreateInput($GCGAMEPLAYGLOBALSarray[7][1], 180, $tabRowHeight+10, 70, 20, $SS_NOTIFY)
+	  GUICtrlCreateUpdown(-1)
+	  GUICtrlSetLimit(-1, 100, 0)
+	  Global $warpsBetweenBattlesLabel = GUICtrlCreateLabel('Warps between battles', 10, $tabRowHeight+12, 165, 20)
+
+	  ;The input for hours between battles
+	  Global $hoursBetweenBattlesInput = GUICtrlCreateInput($GCGAMEPLAYGLOBALSarray[8][1], 430, $tabRowHeight+10, 70, 20, $SS_NOTIFY)
+	  GUICtrlCreateUpdown(-1)
+	  GUICtrlSetLimit(-1, 100, 0)
+	  Global $HoursBetweenBattlesLabel = GUICtrlCreateLabel('Hours between battles', 260, $tabRowHeight+12, 165, 20)
+
+	;Create the starship tab
+	GUICtrlCreateTabItem('Starship')
+
+		;Creating dividers
+		GUICtrlCreateLabel("", 254, $tabRowHeight+10, 2, 755-$tabRowHeight, $SS_SUNKEN)
+		GUICtrlCreateLabel("", 504, $tabRowHeight+10, 2, 755-$tabRowHeight, $SS_SUNKEN)
+
+		;The input for crashed ship minimum unbroken slots
+		Global $shipMinUnbrokenSlotsInput = GUICtrlCreateInput($GCAISPACESHIPGLOBALSarray[1][1], 180, $tabRowHeight+10, 70, 20, $SS_NOTIFY)
+		GUICtrlCreateUpdown(-1)
+		GUICtrlSetLimit(-1, 100, 0)
+		Global $shipMinUnbrokenSlotsLabel = GUICtrlCreateLabel('Minimum Unbroken Slots', 10, $tabRowHeight+12, 165, 20)
 
    ;Close the tab framework
    GUICtrlCreateTabItem('')
@@ -259,14 +363,35 @@ Func generatePakFile()
 			   _FileWriteToLine(@ScriptDir&'\Workshop\GCGAMEPLAYGLOBALS.GLOBAL.exml', 486, '<Property name="ChargeTime" value="'&GUICtrlRead($shipScannerRechargeInput)&'" />', True)
 			EndIf
 
-			;Writing ship scanner recharge rate to file
+			;Writing max tech stacking to file
 			If $GCGAMEPLAYGLOBALSarray[6][0] Then
 			   _FileWriteToLine(@ScriptDir&'\Workshop\GCGAMEPLAYGLOBALS.GLOBAL.exml', 12, '<Property name="MaxNumSameGroupTech" value="'&GUICtrlRead($maxTechStackingInput)&'" />', True)
 			EndIf
 
+			;Writing warps between battles to file
+			If $GCGAMEPLAYGLOBALSarray[7][0] Then
+			   _FileWriteToLine(@ScriptDir&'\Workshop\GCGAMEPLAYGLOBALS.GLOBAL.exml', 234, '<Property name="WarpsBetweenBattles" value="'&GUICtrlRead($warpsBetweenBattlesInput)&'" />', True)
+			EndIf
+
+			;Writing hours between battles to file
+			If $GCGAMEPLAYGLOBALSarray[7][0] Then
+			   _FileWriteToLine(@ScriptDir&'\Workshop\GCGAMEPLAYGLOBALS.GLOBAL.exml', 235, '<Property name="HoursBetweenBattles" value="'&GUICtrlRead($hoursBetweenBattlesInput)&'" />', True)
+			EndIf
+
+		Case 'GCAISPACESHIPGLOBALS.GLOBAL'
+			;Writing freighter spawn chance to file
+			If $GCAISPACESHIPGLOBALSarray[0][0] Then
+			   _FileWriteToLine(@ScriptDir&'\Workshop\GCAISPACESHIPGLOBALS.GLOBAL.exml', 555, '<Property name="FreighterSpawnRate" value="'&GUICtrlRead($freighterSpawnChanceInput)&'" />', True)
+			EndIf
+
+			;Writing crashed ship minimum unbroken slots to file
+			If $GCAISPACESHIPGLOBALSarray[1][0] Then
+			   _FileWriteToLine(@ScriptDir&"\Workshop\GCAISPACESHIPGLOBALS.GLOBAL.exml", 22, '<Property name="CrashedShipMinNonBrokenSlots" value="'&GUICtrlRead($shipMinUnbrokenSlotsInput)&'" />', True)
+			EndIf
+
 	  EndSwitch
 
-	  Run(@ScriptDir&'\Workshop\MBINCompiler.exe Workshop\'&$a&'.exml Workshop\'&$a&'.MBIN' , '', 0)
+	  Run(@ScriptDir&"\Workshop\MBINCompiler.exe Workshop\"&$a&".exml Workshop\"&$a&".MBIN" , '', 0)
 	  Sleep(2000)
 
    Next
@@ -338,10 +463,39 @@ Func updateIncompatibleList()
 	  $GCGAMEPLAYGLOBALSarray[6][0] = False
    EndIf
 
+   ;Check if freighter spawn chance has been modified
+   If GUICtrlRead($freighterSpawnChanceInput) <> $GCAISPACESHIPGLOBALSarray[0][1] Then
+	  $GCAISPACESHIPGLOBALSarray[0][0] = True
+   Else
+	  $GCAISPACESHIPGLOBALSarray[0][0] = False
+   EndIf
+
+   ;Check if warps between battles has been modified
+   If GUICtrlRead($warpsBetweenBattlesInput) <> $GCGAMEPLAYGLOBALSarray[7][1] Then
+	  $GCGAMEPLAYGLOBALSarray[7][0] = True
+   Else
+	  $GCGAMEPLAYGLOBALSarray[7][0] = False
+   EndIf
+
+   ;Check if hours between battles has been modified
+   If GUICtrlRead($hoursBetweenBattlesInput) <> $GCGAMEPLAYGLOBALSarray[8][1] Then
+	  $GCGAMEPLAYGLOBALSarray[8][0] = True
+   Else
+	  $GCGAMEPLAYGLOBALSarray[8][0] = False
+   EndIf
+
+   ;Check if minimum unbroken slots has been modified
+   If GUICtrlRead($shipMinUnbrokenSlotsInput) <> $GCAISPACESHIPGLOBALSarray[1][1] Then
+	  $GCAISPACESHIPGLOBALSarray[1][0] = True
+   Else
+	  $GCAISPACESHIPGLOBALSarray[1][0] = False
+   EndIf
+
    ;Update incompatibleList
    Local $incompatibleListValue = ''
    Global $modifiedFileArray[0]
 
+   ;Check if GCGAMEPLAYGLOBALS.GLOBAL.MBIN has been modified
    For $a=0 To UBound($GCGAMEPLAYGLOBALSarray)-1 Step 1
 	  If $GCGAMEPLAYGLOBALSarray[$a][0] Then
 		 $incompatibleListValue &= 'GCGAMEPLAYGLOBALS.GLOBAL.MBIN'&@CRLF
@@ -350,17 +504,113 @@ Func updateIncompatibleList()
 	  EndIf
    Next
 
+   ;Check if GCAISPACESHIPGLOBALS.GLOBAL.MBIN has been modified
+   For $a=0 To UBound($GCAISPACESHIPGLOBALSarray)-1 Step 1
+	  If $GCAISPACESHIPGLOBALSarray[$a][0] Then
+		 $incompatibleListValue &= 'GCAISPACESHIPGLOBALS.GLOBAL.MBIN'&@CRLF
+		 _ArrayAdd($modifiedFileArray, 'GCAISPACESHIPGLOBALS.GLOBAL')
+		 ExitLoop
+	  EndIf
+   Next
+
    If GUICtrlRead($incompatibleList) <> $incompatibleListValue Then
 	  GUICtrlSetData($incompatibleList, $incompatibleListValue)
    EndIf
 
-EndFunc ;==> redCtrlValues
+EndFunc ;==> updateIncompatibleList
+
+
+Func updateValuesForFullMod()
+
+   ;Updating values for Starship Out of Range (alechielke)
+   If $fullmodSSOORCurrentValue <> GUICtrlRead($fullmodSSOORInput) Then
+	  Switch GUICtrlRead($fullmodSSOORInput)
+		 Case 'None selected'
+			GUICtrlSetData($starshipInteractRangeInput, $GCGAMEPLAYGLOBALSarray[1][1])
+			$fullmodSSOORCurrentValue = 'None selected'
+		 Case '200 units'
+			GUICtrlSetData($starshipInteractRangeInput, 200)
+			$fullmodSSOORCurrentValue = '200 units'
+		 Case '500 units'
+			GUICtrlSetData($starshipInteractRangeInput, 500)
+			$fullmodSSOORCurrentValue = '500 units'
+		 Case '1000 units'
+			GUICtrlSetData($starshipInteractRangeInput, 1000)
+			$fullmodSSOORCurrentValue = '1000 units'
+		 Case '5000 units'
+			GUICtrlSetData($starshipInteractRangeInput, 5000)
+			$fullmodSSOORCurrentValue = '5000 units'
+		 Case 'Infinite'
+			GUICtrlSetData($starshipInteractRangeInput, 999999)
+			$fullmodSSOORCurrentValue = 'Infinite'
+	  EndSwitch
+   EndIf
+
+   ;Updating values for Faster Scanner (alechielke)
+   If $fullmodFasterScannerCurrentValue <> GUICtrlRead($fullmodFasterScannerInput) Then
+	  Switch GUICtrlRead($fullmodFasterScannerInput)
+		 Case 'None selected'
+			GUICtrlSetData($multitoolScannerRangeInput, $GCGAMEPLAYGLOBALSarray[2][1])
+			GUICtrlSetData($multitoolScannerRechargeInput, $GCGAMEPLAYGLOBALSarray[3][1])
+			GUICtrlSetData($shipScannerRangeInput, $GCGAMEPLAYGLOBALSarray[4][1])
+			GUICtrlSetData($shipScannerRechargeInput, $GCGAMEPLAYGLOBALSarray[5][1])
+			$fullmodFasterScannerCurrentValue = 'None selected'
+		 Case 'Standard version'
+			GUICtrlSetData($multitoolScannerRangeInput, 400)
+			GUICtrlSetData($multitoolScannerRechargeInput, 2)
+			GUICtrlSetData($shipScannerRangeInput, 20000)
+			GUICtrlSetData($shipScannerRechargeInput, 2)
+			$fullmodFasterScannerCurrentValue = 'Standard version'
+	  EndSwitch
+   EndIf
+
+   ;Updating values for Faster Analysis (alechielke)
+   If $fullmodFasterAnalysisCurrentValue <> GUICtrlRead($fullmodFasterAnalysisInput) Then
+	  Switch GUICtrlRead($fullmodFasterAnalysisInput)
+		 Case 'None selected'
+			GUICtrlSetData($analysisTimeInput, $GCGAMEPLAYGLOBALSarray[0][1])
+			$fullmodFasterAnalysisCurrentValue = 'None selected'
+		 Case '3 seconds'
+			GUICtrlSetData($analysisTimeInput, 3)
+			$fullmodFasterAnalysisCurrentValue = '3 seconds'
+		 Case '1 second'
+			GUICtrlSetData($analysisTimeInput, 1)
+			$fullmodFasterAnalysisCurrentValue = '1 second'
+		 Case 'Instant'
+			GUICtrlSetData($analysisTimeInput, 0)
+			$fullmodFasterAnalysisCurrentValue = 'Instant'
+	  EndSwitch
+   EndIf
+
+	;Updating values for Unlimited Tech Stacking (Greshloc)
+	If $fullmodUnlimitedTechStackingCurrentValue <> GUICtrlRead($fullmodUnlimitedTechStackingInput) Then
+		Switch GUICtrlRead($fullmodUnlimitedTechStackingInput)
+			Case 'None selected'
+				GUICtrlSetData($maxTechStackingInput, $GCGAMEPLAYGLOBALSarray[6][1])
+				$fullmodUnlimitedTechStackingCurrentValue = 'None selected'
+			Case '2x'
+				GUICtrlSetData($maxTechStackingInput, $GCGAMEPLAYGLOBALSarray[6][1]*2)
+				$fullmodUnlimitedTechStackingCurrentValue = '2x'
+			Case '4x'
+				GUICtrlSetData($maxTechStackingInput, $GCGAMEPLAYGLOBALSarray[6][1]*4)
+				$fullmodUnlimitedTechStackingCurrentValue = '4x'
+			Case '6x'
+				GUICtrlSetData($maxTechStackingInput, $GCGAMEPLAYGLOBALSarray[6][1]*6)
+				$fullmodUnlimitedTechStackingCurrentValue = '6x'
+			Case 'Unlimited'
+				GUICtrlSetData($maxTechStackingInput, 9999999)
+				$fullmodUnlimitedTechStackingCurrentValue = 'Unlimited'
+	  EndSwitch
+	EndIf
+
+EndFunc ;==> updateValuesforFullMod
 
 ;Actual code
 createGUI()
 While 1
 
    updateIncompatibleList()
+   updateValuesForFullMod()
    Sleep(1000)
 
 WEnd
